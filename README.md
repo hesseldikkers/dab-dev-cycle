@@ -1,7 +1,7 @@
 # dab-dev-cycle
 
 Example Declarative Automation Bundle (`orders`) with a medallion
-architecture and three jobs. Companion repository for an article on
+architecture and four jobs. Companion repository for an article on
 setting up a bundle that grows with your team and closes the dev
 cycle.
 
@@ -10,6 +10,10 @@ cycle.
 | `orders_bronze` | Auto Loader ingest from a volume | cron, daily 06:00 |
 | `orders_silver` | Standardize types, keep latest order version | update of `orders_bronze` |
 | `orders_gold` | SQL mart `orders_daily` | update of `orders_silver` |
+| `orders_silver_backfill` | Silver on a classic job cluster | manual only |
+
+`orders_silver_backfill` needs classic compute and does not run on
+Databricks Free Edition.
 
 ## Prerequisites
 
@@ -33,6 +37,7 @@ databricks bundle plan -t dev -p <profile>
 ```
 databricks.yml          # bundle, variables, targets
 resources/              # <name>.<type>.yml, one file per resource
+mutators.py             # deploy-time standards (Python mutators)
 src/orders/             # all logic; tasks only call it
 tests/                  # pytest unit tests
 ```
