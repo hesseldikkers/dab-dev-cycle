@@ -4,7 +4,7 @@ WITH lines AS (
     order_id,
     customer_id,
     CAST(ordered_at AS DATE) AS order_date,
-    product.price * product.quantity AS line_total
+    product.price * product.qty AS line_total
   FROM IDENTIFIER(:catalog || '.' || :schema || '.orders_silver')
   LATERAL VIEW EXPLODE(products) AS product
 )

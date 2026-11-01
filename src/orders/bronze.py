@@ -1,30 +1,33 @@
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
-from orders.args import parse_args
+from orders.location import Location, Table, Volume
 
 
-def ingest(spark: SparkSession, catalog: str, schema: str) -> None:
-    base = f"/Volumes/{catalog}/{schema}"
-    (
+def ingest(spark: SparkSession, location: Location) -> None:
+    checkpoints = f"{location.volume(Volume.CHECKPOINTS)}/bronze"
+
+    orders = (
         spark.readStream.format("cloudFiles")
         .option("cloudFiles.format", "json")
-        .option(
-            "cloudFiles.schemaLocation",
-            f"{base}/checkpoints/bronze/schema",
+        .option("cloudFiles.schemaLocation", f"{checkpoints}/schema")
+        .load(f"{location.volume(Volume.LANDING)}/sales_orders")
+        .select(
+            "*",
+            F.col("_metadata.file_path").alias("_source_file"),
+            F.current_timestamp().alias("_ingested_at"),
         )
-        .load(f"{base}/landing/sales_orders/")
-        .withColumn("_source_file", F.col("_metadata.file_path"))
-        .withColumn("_ingested_at", F.current_timestamp())
-        .writeStream.option(
-            "checkpointLocation", f"{base}/checkpoints/bronze/orders"
+    )
+
+    (
+        orders.writeStream.option(
+            "checkpointLocation", f"{checkpoints}/orders"
         )
         .trigger(availableNow=True)
-        .toTable(f"{catalog}.{schema}.orders_bronze")
+        .toTable(location.table(Table.BRONZE))
         .awaitTermination()
     )
 
 
 def main() -> None:
-    args = parse_args()
-    ingest(SparkSession.builder.getOrCreate(), args.catalog, args.schema)
+    ingest(SparkSession.builder.getOrCreate(), Location.from_args())
