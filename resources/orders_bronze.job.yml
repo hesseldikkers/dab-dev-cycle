@@ -4,7 +4,6 @@ resources:
       name: orders_bronze
 
       tags:
-        project: orders
         layer: bronze
 
       schedule:

@@ -4,7 +4,6 @@ resources:
       name: orders_gold
 
       tags:
-        project: orders
         layer: gold
 
       trigger:

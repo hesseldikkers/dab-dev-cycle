@@ -4,7 +4,6 @@ resources:
       name: orders_silver
 
       tags:
-        project: orders
         layer: silver
 
       trigger:
