@@ -12,6 +12,7 @@ silver = "orders.silver:main"
 
 [dependency-groups]
 dev = [
+    "databricks-bundles>=1.23.0",
     "pyspark>=4.1,<4.2",
     "pytest",
     "ruff",
@@ -26,6 +27,7 @@ packages = ["src/orders"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 
 [tool.ruff]
 line-length = 79

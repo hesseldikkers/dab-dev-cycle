@@ -4,6 +4,7 @@ resources:
       name: orders_bronze
 
       tags:
+        owner: orders-team
         layer: bronze
 
       schedule:
@@ -23,6 +24,5 @@ resources:
       environments:
         - environment_key: default
           spec:
-            environment_version: "5"
             dependencies:
               - ../dist/*.whl

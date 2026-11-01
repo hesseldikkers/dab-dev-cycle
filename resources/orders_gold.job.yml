@@ -4,6 +4,7 @@ resources:
       name: orders_gold
 
       tags:
+        owner: orders-team
         layer: gold
 
       trigger:

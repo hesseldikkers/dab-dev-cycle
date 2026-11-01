@@ -4,6 +4,7 @@ resources:
       name: orders_silver
 
       tags:
+        owner: orders-team
         layer: silver
 
       trigger:
@@ -24,6 +25,5 @@ resources:
       environments:
         - environment_key: default
           spec:
-            environment_version: "5"
             dependencies:
               - ../dist/*.whl
