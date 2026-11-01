@@ -2,10 +2,16 @@ resources:
   jobs:
     orders_gold:
       name: orders_gold
+
+      tags:
+        project: orders
+        layer: gold
+
       trigger:
         table_update:
           table_names:
             - ${var.catalog}.${var.schema}.orders_silver
+
       tasks:
         - task_key: build_mart
           sql_task:

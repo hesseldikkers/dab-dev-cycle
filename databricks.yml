@@ -12,8 +12,10 @@ artifacts:
 variables:
   catalog:
     default: workspace
+
   schema:
     default: orders_dev
+
   warehouse_id:
     lookup:
       warehouse: Serverless Starter Warehouse

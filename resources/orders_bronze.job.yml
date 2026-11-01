@@ -2,9 +2,15 @@ resources:
   jobs:
     orders_bronze:
       name: orders_bronze
+
+      tags:
+        project: orders
+        layer: bronze
+
       schedule:
         quartz_cron_expression: "0 0 6 * * ?"
         timezone_id: Europe/Amsterdam
+
       tasks:
         - task_key: ingest
           environment_key: default
@@ -14,6 +20,7 @@ resources:
             named_parameters:
               catalog: ${var.catalog}
               schema: ${var.schema}
+
       environments:
         - environment_key: default
           spec:
