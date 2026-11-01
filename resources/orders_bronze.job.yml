@@ -4,6 +4,7 @@ resources:
       name: orders_bronze
 
       tags:
+        owner: orders-team
         layer: bronze
 
       schedule:

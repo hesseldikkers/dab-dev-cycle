@@ -4,6 +4,7 @@ resources:
       name: orders_silver
 
       tags:
+        owner: orders-team
         layer: silver
 
       trigger:

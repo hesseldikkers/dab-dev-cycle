@@ -12,6 +12,15 @@ wheels = [
 ]
 
 [[package]]
+name = "databricks-bundles"
+version = "1.23.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f3/99/06979e3a92867759cb71331a48fc884057cc47fb3aa80aacf97cde5b2784/databricks_bundles-1.23.0.tar.gz", hash = "sha256:6c2198d1a98ad6d3ef385b2f9a00e5461fc14b62aaad74a082d6cf68281736ff", size = 264507, upload-time = "2026-10-29T12:12:49.415Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3a/d8/37ec872cc291a3ae36d9f9141837e0387a3a7a7083c97fd595a4959abf95/databricks_bundles-1.23.0-py3-none-any.whl", hash = "sha256:ab8c6673fc8ddff47942fa5826e6872d1ae6b5de47e47556e905259f8d4e26e6", size = 675711, upload-time = "2026-10-29T12:12:48.035Z" },
+]
+
+[[package]]
 name = "iniconfig"
 version = "2.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -27,6 +36,7 @@ source = { editable = "." }
 
 [package.dev-dependencies]
 dev = [
+    { name = "databricks-bundles" },
     { name = "pyspark" },
     { name = "pytest" },
     { name = "ruff" },
@@ -36,6 +46,7 @@ dev = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "databricks-bundles", specifier = ">=1.23.0" },
     { name = "pyspark", specifier = ">=4.1,<4.2" },
     { name = "pytest" },
     { name = "ruff" },
