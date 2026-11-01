@@ -1,10 +1,11 @@
 docs/*
+snippets/*
 AGENTS.md
-docs/plan.md
 .databricks/
 dist/
-.venv/
 __pycache__/
 *.egg-info/
 .pytest_cache/
 .ruff_cache/
+.venv/
+.vscode

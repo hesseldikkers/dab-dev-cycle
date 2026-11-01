@@ -29,3 +29,4 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 79
+extend-exclude = ["snippets"]
