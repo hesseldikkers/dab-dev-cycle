@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from orders.silver import standardize, upsert
+from orders.silver import keep_latest, standardize, upsert
 
 BRONZE_SCHEMA = (
     "order_number string, customer_id string, customer_name string,"
@@ -20,12 +20,14 @@ PRODUCTS = [
 ]
 
 
-def bronze_row(order_number="1", customer_name="  Acme "):
+def bronze_row(
+    order_number="1", customer_name="  Acme ", order_datetime="1564627663"
+):
     return (
         order_number,
         "19476252",
         customer_name,
-        "1564627663",
+        order_datetime,
         json.dumps(PRODUCTS),
     )
 
@@ -50,11 +52,23 @@ def test_standardize_casts_types_and_parses_products(spark):
     assert row.products[0].price == 448.0
 
 
-def test_standardize_drops_duplicate_orders(spark):
-    rows = [bronze_row("1"), bronze_row("1"), bronze_row("2")]
-    df = spark.createDataFrame(rows, BRONZE_SCHEMA)
+def test_standardize_keeps_empty_datetime_as_null(spark):
+    df = spark.createDataFrame([bronze_row(order_datetime="")], BRONZE_SCHEMA)
 
-    assert standardize(df).count() == 2
+    assert standardize(df).collect()[0].ordered_at is None
+
+
+def test_keep_latest_keeps_newest_version_per_order(spark):
+    rows = [
+        bronze_row("1", "old", "1564637502"),
+        bronze_row("1", "new", "1564637509"),
+        bronze_row("2"),
+    ]
+    df = standardize(spark.createDataFrame(rows, BRONZE_SCHEMA))
+
+    kept = {r.order_id: r.customer_name for r in keep_latest(df).collect()}
+
+    assert kept == {1: "new", 2: "Acme"}
 
 
 def test_upsert_creates_missing_table(spark, silver_table):

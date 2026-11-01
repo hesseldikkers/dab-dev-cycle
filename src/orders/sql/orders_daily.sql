@@ -7,6 +7,7 @@ WITH lines AS (
     product.price * product.qty AS line_total
   FROM IDENTIFIER(:catalog || '.' || :schema || '.orders_silver')
   LATERAL VIEW EXPLODE(products) AS product
+  WHERE ordered_at IS NOT NULL
 )
 SELECT
   order_date,
