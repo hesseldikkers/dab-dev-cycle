@@ -18,6 +18,9 @@ variables:
   warehouse_id:
     lookup:
       warehouse: Serverless Starter Warehouse
+  project:
+    description: Value of the project tag, used by add_defaults
+    default: ${bundle.name}
   deploy_sp:
     description: Deploy service principal, set by the pipeline
     default: <deploy-sp-id>
@@ -25,13 +28,10 @@ variables:
     description: Run-as service principal, set by the pipeline
     default: <run-as-sp-id>
 
-presets:
-  tags:
-    project: orders
-
 python:
   venv_path: .venv
   mutators:
+    - "mutators:add_defaults"
     - "mutators:require_owner"
 
 # No workspace.host: the repo is public and all targets share one
