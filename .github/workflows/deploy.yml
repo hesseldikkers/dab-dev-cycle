@@ -36,6 +36,9 @@ jobs:
       - uses: databricks/setup-cli@v1.23.0
 
       - run: databricks bundle deploy -t acc
+        working-directory: platform
+
+      - run: databricks bundle deploy -t acc
 
   prd:
     needs: acc
@@ -58,5 +61,8 @@ jobs:
       - run: uv sync --locked
 
       - uses: databricks/setup-cli@v1.23.0
+
+      - run: databricks bundle deploy -t prd
+        working-directory: platform
 
       - run: databricks bundle deploy -t prd

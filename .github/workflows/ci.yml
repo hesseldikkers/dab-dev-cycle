@@ -50,10 +50,18 @@ jobs:
       - uses: databricks/setup-cli@v1.23.0
 
       - run: databricks bundle validate --strict -t acc
+        working-directory: platform
+
+      - run: databricks bundle plan -t acc | tee ../plan-platform-acc.txt
+        working-directory: platform
+
+      - run: databricks bundle validate --strict -t acc
 
       - run: databricks bundle plan -t acc | tee plan-acc.txt
 
       - uses: actions/upload-artifact@v7
         with:
           name: plan-acc
-          path: plan-acc.txt
+          path: |
+            plan-platform-acc.txt
+            plan-acc.txt
