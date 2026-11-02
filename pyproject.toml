@@ -13,9 +13,11 @@ silver = "orders.silver:main"
 [dependency-groups]
 dev = [
     "databricks-bundles>=1.23.0",
+    "prek>=0.5.9",
     "pyspark>=4.1,<4.2",
     "pytest",
     "ruff",
+    "sqlfluff>=4.5.0",
 ]
 
 [build-system]
@@ -32,3 +34,15 @@ pythonpath = ["."]
 [tool.ruff]
 line-length = 79
 extend-exclude = ["snippets"]
+
+[tool.sqlfluff.core]
+dialect = "databricks"
+templater = "placeholder"
+
+[tool.sqlfluff.indentation]
+tab_space_size = 2
+
+[tool.sqlfluff.templater.placeholder]
+param_style = "colon"
+catalog = "workspace"
+schema = "orders_dev"

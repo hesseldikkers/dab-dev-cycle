@@ -66,7 +66,8 @@ variables.
 | Task | Command |
 | --- | --- |
 | Unit tests | `JAVA_HOME=$(brew --prefix openjdk@17) uv run pytest` |
-| Lint | `uv run ruff check . && uv run ruff format --check .` |
+| Lint (ruff, sqlfluff) | `uv run prek run --all-files` |
+| Run checks on every commit | `uv run prek install` |
 | Validate | `databricks bundle validate --strict -t <target>` |
 | Preview changes | `databricks bundle plan -t <target>` |
 
