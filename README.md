@@ -43,6 +43,7 @@ mutators.py             # deploy-time standards (Python mutators)
 src/orders/             # all logic; tasks only call it
 tests/                  # pytest unit tests
 platform/               # examples managed outside this bundle
+.github/workflows/      # CI (pull requests) and deploy (main)
 ```
 
 ## Targets
@@ -62,6 +63,29 @@ CI set `DATABRICKS_HOST`. The CLI fails when a profile host differs
 from a host set in the YAML, and `workspace.host` does not accept
 variables.
 
+## CI/CD
+
+| Workflow | Runs on | Steps |
+| --- | --- | --- |
+| `ci.yml` | pull request | prek, pytest, `validate --strict -t acc`, `plan -t acc` (artifact) |
+| `deploy.yml` | push to `main` | `deploy -t acc`, then `deploy -t prd` after approval |
+
+The workflows log in with workload identity federation (OIDC), so
+the repository holds no Databricks secrets. One-time setup:
+
+1. In GitHub, create the environments `acc` and `prd`. On `prd`, add
+   required reviewers and allow deployments from `main` only.
+2. Set `DATABRICKS_HOST` as a repository variable, and
+   `DEPLOY_SP_ID` and `RUN_AS_SP_ID` per environment. Without
+   `DATABRICKS_HOST`, the Databricks jobs are skipped.
+3. In Databricks, create one federation policy per environment on
+   the deploy principal. Use the issuer
+   `https://token.actions.githubusercontent.com` and the subject
+   `repo:<org>/<repo>:environment:<env>`.
+
+The deploy principal deploys; the run-as principal runs the `prd`
+jobs.
+
 ## Common tasks
 
 | Task | Command |
@@ -79,6 +103,12 @@ variables.
 - **Nothing downstream runs on a new target.** The silver and gold
   triggers watch tables that the earlier jobs create. Run bronze
   first.
+- **`deploy` fails with "Only serverless compute is supported".**
+  Free Edition rejects the classic job `orders_silver_backfill`.
+  Deploy the serverless jobs only:
+  `databricks bundle deploy -t dev --select orders_bronze,orders_silver,orders_gold`.
+  `--select` is meant for development. The deploy workflow is not
+  run on Free Edition for this reason.
 - **`validate -t acc` fails on the root path.** The path belongs to
   the deploy principal. Locally pass
   `--var deploy_sp=<your-user-name>`.
