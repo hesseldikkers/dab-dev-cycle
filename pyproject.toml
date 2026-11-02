@@ -16,6 +16,7 @@ dev = [
     "prek>=0.5.9",
     "pyspark>=4.1,<4.2",
     "pytest",
+    "pytest-cov>=7.1.0",
     "ruff",
     "sqlfluff>=4.5.0",
 ]
@@ -30,6 +31,10 @@ packages = ["src/orders"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+addopts = "--cov --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["orders", "mutators"]
 
 [tool.ruff]
 line-length = 79
