@@ -1,0 +1,30 @@
+resources:
+  jobs:
+    orders_silver_backfill:
+      name: orders_silver_backfill
+
+      tags:
+        owner: orders-team
+        layer: silver
+
+      job_clusters:
+        - job_cluster_key: default
+          new_cluster:
+            policy_id: ${var.job_policy}
+            apply_policy_default_values: true
+            data_security_mode: SINGLE_USER
+            autoscale:
+              min_workers: 2
+              max_workers: 4
+
+      tasks:
+        - task_key: standardize
+          job_cluster_key: default
+          python_wheel_task:
+            package_name: orders
+            entry_point: silver
+            named_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+          libraries:
+            - whl: ../dist/*.whl
