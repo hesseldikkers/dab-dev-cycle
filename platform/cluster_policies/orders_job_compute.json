@@ -1,0 +1,29 @@
+{
+  "cluster_type": {
+    "type": "fixed",
+    "value": "job"
+  },
+  "spark_version": {
+    "type": "unlimited",
+    "defaultValue": "auto:latest-lts"
+  },
+  "node_type_id": {
+    "type": "allowlist",
+    "values": ["Standard_D4ds_v5", "Standard_D8ds_v5"],
+    "defaultValue": "Standard_D4ds_v5"
+  },
+  "autoscale.min_workers": {
+    "type": "range",
+    "maxValue": 4,
+    "defaultValue": 2
+  },
+  "autoscale.max_workers": {
+    "type": "range",
+    "maxValue": 8,
+    "defaultValue": 4
+  },
+  "custom_tags.team": {
+    "type": "fixed",
+    "value": "orders"
+  }
+}

@@ -13,7 +13,8 @@ cycle.
 | `orders_silver_backfill` | Silver on a classic job cluster | manual only |
 
 `orders_silver_backfill` needs classic compute and does not run on
-Databricks Free Edition.
+Databricks Free Edition. Its cluster settings come from a cluster
+policy; see `platform/cluster_policies/`.
 
 ## Prerequisites
 
@@ -40,6 +41,7 @@ resources/              # <name>.<type>.yml, one file per resource
 mutators.py             # deploy-time standards (Python mutators)
 src/orders/             # all logic; tasks only call it
 tests/                  # pytest unit tests
+platform/               # examples managed outside this bundle
 ```
 
 ## Targets

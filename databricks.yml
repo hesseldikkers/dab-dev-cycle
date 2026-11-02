@@ -18,6 +18,10 @@ variables:
   warehouse_id:
     lookup:
       warehouse: Serverless Starter Warehouse
+  job_policy:
+    description: Cluster policy for classic job clusters
+    lookup:
+      cluster_policy: Job Compute
   project:
     description: Value of the project tag, used by add_defaults
     default: ${bundle.name}
