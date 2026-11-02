@@ -75,8 +75,9 @@ the repository holds no Databricks secrets. One-time setup:
 
 1. In GitHub, create the environments `acc` and `prd`. On `prd`, add
    required reviewers and allow deployments from `main` only.
-2. Set these environment variables: `DATABRICKS_HOST`,
-   `DEPLOY_SP_ID` and `RUN_AS_SP_ID`.
+2. Set `DATABRICKS_HOST` as a repository variable, and
+   `DEPLOY_SP_ID` and `RUN_AS_SP_ID` per environment. Without
+   `DATABRICKS_HOST`, the Databricks jobs are skipped.
 3. In Databricks, create one federation policy per environment on
    the deploy principal. Use the issuer
    `https://token.actions.githubusercontent.com` and the subject

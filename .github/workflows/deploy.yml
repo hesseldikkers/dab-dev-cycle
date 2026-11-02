@@ -11,10 +11,10 @@ concurrency:
   group: deploy
   cancel-in-progress: false
 
-# Written for a full account. Free Edition rejects the classic
-# backfill job, so this workflow has not been run there.
+# Skipped until DATABRICKS_HOST is set (full account)
 jobs:
   acc:
+    if: vars.DATABRICKS_HOST != ''
     runs-on: ubuntu-latest
     environment: acc
     permissions:
