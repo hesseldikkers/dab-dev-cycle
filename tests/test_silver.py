@@ -71,9 +71,36 @@ def test_keep_latest_keeps_newest_version_per_order(spark):
     assert kept == {1: "new", 2: "Acme"}
 
 
+def test_keep_latest_prefers_dated_over_undated_version(spark):
+    rows = [
+        bronze_row("1", "undated", ""),
+        bronze_row("1", "dated", "1564637502"),
+    ]
+    df = standardize(spark.createDataFrame(rows, BRONZE_SCHEMA))
+
+    kept = keep_latest(df).collect()
+
+    assert [r.customer_name for r in kept] == ["dated"]
+
+
 def test_upsert_creates_missing_table(spark, silver_table):
     df = standardize(spark.createDataFrame([bronze_row()], BRONZE_SCHEMA))
 
     upsert(df, silver_table)
 
     assert spark.table(silver_table).count() == 1
+
+
+def test_upsert_updates_and_inserts(spark, silver_table):
+    first = [bronze_row("1", "old")]
+    second = [bronze_row("1", "new"), bronze_row("2")]
+    for rows in (first, second):
+        df = standardize(spark.createDataFrame(rows, BRONZE_SCHEMA))
+        upsert(df, silver_table)
+
+    names = {
+        r.order_id: r.customer_name
+        for r in spark.table(silver_table).collect()
+    }
+
+    assert names == {1: "new", 2: "Acme"}

@@ -20,7 +20,8 @@ policy; see `platform/cluster_policies/`.
 
 - Databricks CLI 1.23.0
 - [uv](https://docs.astral.sh/uv/)
-- Java 17 for the local Spark tests
+- Java 17 for the local Spark tests (the first run downloads the
+  Delta jars from Maven Central)
 - Per target: schema `orders_<env>` in catalog `workspace`, with the
   volumes `landing` (raw JSON in `sales_orders/`) and `checkpoints`
 
@@ -66,7 +67,8 @@ variables.
 | Task | Command |
 | --- | --- |
 | Unit tests | `JAVA_HOME=$(brew --prefix openjdk@17) uv run pytest` |
-| Lint | `uv run ruff check . && uv run ruff format --check .` |
+| Lint (ruff, sqlfluff) | `uv run prek run --all-files` |
+| Run checks on every commit | `uv run prek install` |
 | Validate | `databricks bundle validate --strict -t <target>` |
 | Preview changes | `databricks bundle plan -t <target>` |
 
