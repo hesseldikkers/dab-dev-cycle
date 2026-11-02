@@ -12,10 +12,6 @@ resources:
           new_cluster:
             policy_id: ${var.job_policy}
             apply_policy_default_values: true
-            data_security_mode: SINGLE_USER
-            autoscale:
-              min_workers: 2
-              max_workers: 4
 
       tasks:
         - task_key: standardize
