@@ -13,6 +13,7 @@ silver = "orders.silver:main"
 [dependency-groups]
 dev = [
     "databricks-bundles>=1.23.0",
+    "delta-spark>=4.4.1",
     "prek>=0.5.9",
     "pyspark>=4.1,<4.2",
     "pytest",
