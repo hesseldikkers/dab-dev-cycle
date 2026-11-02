@@ -14,7 +14,7 @@ cycle.
 
 `orders_silver_backfill` needs classic compute and does not run on
 Databricks Free Edition. Its cluster settings come from a cluster
-policy; see `platform/cluster_policies/`.
+policy that the `platform` bundle deploys; see `platform/`.
 
 ## Prerequisites
 
@@ -42,7 +42,7 @@ resources/              # <name>.<type>.yml, one file per resource
 mutators.py             # deploy-time standards (Python mutators)
 src/orders/             # all logic; tasks only call it
 tests/                  # pytest unit tests
-platform/               # examples managed outside this bundle
+platform/               # second bundle: workspace components (policies)
 .github/workflows/      # CI (pull requests) and deploy (main)
 ```
 
@@ -67,8 +67,8 @@ variables.
 
 | Workflow | Runs on | Steps |
 | --- | --- | --- |
-| `ci.yml` | pull request | prek, pytest, `validate --strict -t acc`, `plan -t acc` (artifact) |
-| `deploy.yml` | push to `main` | `deploy -t acc`, then `deploy -t prd` after approval |
+| `ci.yml` | pull request | prek, pytest, `validate --strict -t acc`, `plan -t acc` (artifact), for `platform/` and the root bundle |
+| `deploy.yml` | push to `main` | `deploy -t acc`, then `deploy -t prd` after approval; `platform/` goes first |
 
 The workflows log in with workload identity federation (OIDC), so
 the repository holds no Databricks secrets. One-time setup:
@@ -111,4 +111,8 @@ jobs.
   run on Free Edition for this reason.
 - **`validate -t acc` fails on the root path.** The path belongs to
   the deploy principal. Locally pass
-  `--var deploy_sp=<your-user-name>`.
+  `--var deploy_sp=<your-user-name>`. The `platform` bundle needs
+  the same override for every target.
+- **`validate` fails with "Policy named 'job-compute-...'
+  does not exist".** Deploy the `platform` bundle first, or pass
+  `--var job_policy=<policy-id>`.
