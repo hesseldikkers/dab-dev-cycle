@@ -62,6 +62,8 @@ targets:
       root_path: /Workspace/Users/${var.deploy_sp}/.bundle/${bundle.name}/${bundle.target}
     variables:
       schema: orders_acc
+    run_as:
+      service_principal_name: ${var.run_as_sp}
     permissions:
       - service_principal_name: ${var.deploy_sp}
         level: CAN_MANAGE
