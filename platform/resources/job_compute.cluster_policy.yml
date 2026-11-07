@@ -53,9 +53,9 @@ resources:
         azure_attributes.availability:
           type: fixed
           value: ON_DEMAND_AZURE
-        custom_tags.team:
+        custom_tags.policy:
           type: fixed
-          value: data-platform
+          value: job-compute
         custom_tags.cost_center:
           type: unlimited
           defaultValue: unassigned
