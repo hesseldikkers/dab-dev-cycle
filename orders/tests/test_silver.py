@@ -1,7 +1,6 @@
 import json
 
 import pytest
-
 from orders.silver import keep_latest, standardize, upsert
 
 BRONZE_SCHEMA = (

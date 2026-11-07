@@ -6,7 +6,6 @@ from databricks.bundles.jobs import (
     JobEmailNotifications,
     JobEnvironment,
 )
-
 from mutators import (
     ALERT_EMAIL,
     ENVIRONMENT_VERSION,

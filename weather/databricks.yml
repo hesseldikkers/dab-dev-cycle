@@ -1,12 +1,12 @@
 bundle:
-  name: orders
+  name: weather
   databricks_cli_version: "1.23.0"
 
 include:
   - resources/*.yml
 
 artifacts:
-  orders_wheel:
+  weather_wheel:
     type: whl
     build: uv build --wheel
 
@@ -15,28 +15,16 @@ variables:
     default: workspace
   schema:
     description: Schema per target, set in each target below
-  warehouse_id:
-    lookup:
-      warehouse: Serverless Starter Warehouse
   job_policy:
     description: Cluster policy from the platform bundle
     lookup:
       cluster_policy: job-compute-${bundle.target}
-  project:
-    description: Value of the project tag, used by add_defaults
-    default: ${bundle.name}
   deploy_sp:
     description: Deploy service principal, set by the pipeline
     default: <deploy-sp-id>
   run_as_sp:
     description: Run-as service principal, set by the pipeline
     default: <run-as-sp-id>
-
-python:
-  venv_path: .venv
-  mutators:
-    - "mutators:add_defaults"
-    - "mutators:require_owner"
 
 # No workspace.host: the repo is public and all targets share one
 # workspace. Locally use -p <profile>, in CI set DATABRICKS_HOST.
@@ -48,7 +36,7 @@ targets:
       tags:
         environment: dev
     variables:
-      schema: orders_dev
+      schema: weather_dev
 
   acc:
     mode: production
@@ -61,7 +49,7 @@ targets:
     workspace:
       root_path: /Workspace/Users/${var.deploy_sp}/.bundle/${bundle.name}/${bundle.target}
     variables:
-      schema: orders_acc
+      schema: weather_acc
     run_as:
       service_principal_name: ${var.run_as_sp}
     permissions:
@@ -80,7 +68,7 @@ targets:
     workspace:
       root_path: /Workspace/Users/${var.deploy_sp}/.bundle/${bundle.name}/${bundle.target}
     variables:
-      schema: orders_prd
+      schema: weather_prd
     run_as:
       service_principal_name: ${var.run_as_sp}
     permissions:

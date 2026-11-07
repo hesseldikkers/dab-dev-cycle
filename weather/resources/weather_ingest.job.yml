@@ -1,11 +1,15 @@
 resources:
   jobs:
-    orders_silver_backfill:
-      name: orders_silver_backfill
+    weather_ingest:
+      name: weather_ingest
 
       tags:
-        owner: orders-team
-        layer: silver
+        owner: forecasting-team
+        layer: bronze
+
+      schedule:
+        quartz_cron_expression: "0 0 5 * * ?"
+        timezone_id: Europe/Amsterdam
 
       job_clusters:
         - job_cluster_key: default
@@ -14,11 +18,11 @@ resources:
             apply_policy_default_values: true
 
       tasks:
-        - task_key: standardize
+        - task_key: ingest
           job_cluster_key: default
           python_wheel_task:
-            package_name: orders
-            entry_point: silver
+            package_name: weather
+            entry_point: ingest
             named_parameters:
               catalog: ${var.catalog}
               schema: ${var.schema}

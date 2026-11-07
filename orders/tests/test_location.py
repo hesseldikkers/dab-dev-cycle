@@ -1,5 +1,4 @@
 import pytest
-
 from orders.location import Location, Table, Volume
 
 

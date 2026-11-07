@@ -1,18 +1,28 @@
 # dab-dev-cycle
 
-Example Declarative Automation Bundle (`orders`) with a medallion
-architecture and four jobs. Companion repository for an article on
-setting up a bundle that grows with your team and closes the dev
-cycle.
+Example Declarative Automation Bundles: a medallion architecture, a
+classic-compute job from another team and the workspace policies
+they share. Companion repository for an article on setting up
+bundles that grow with your team and closes the dev cycle.
 
-| Job | What it does | Starts on |
+One repository, one folder per bundle. Each bundle has its own
+`databricks.yml`, its own Python project (`pyproject.toml`,
+`uv.lock`, `.venv`) and deploys on its own.
+
+| Bundle | Owner | Compute |
 | --- | --- | --- |
-| `orders_bronze` | Auto Loader ingest from a volume | cron, daily 06:00 |
-| `orders_silver` | Standardize types, keep latest order version | update of `orders_bronze` |
-| `orders_gold` | SQL mart `orders_daily` | update of `orders_silver` |
-| `orders_silver_backfill` | Silver on a classic job cluster | manual only |
+| `orders/` | orders team | serverless, SQL warehouse |
+| `weather/` | forecasting team | classic, from a cluster policy |
+| `platform/` | platform team | none; holds the cluster policies |
 
-`orders_silver_backfill` needs classic compute and does not run on
+| Job | Bundle | What it does | Starts on |
+| --- | --- | --- | --- |
+| `orders_bronze` | `orders` | Auto Loader ingest from a volume | cron, daily 06:00 |
+| `orders_silver` | `orders` | Standardize types, keep latest order version | update of `orders_bronze` |
+| `orders_gold` | `orders` | SQL mart `orders_daily` | update of `orders_silver` |
+| `weather_ingest` | `weather` | Load station observations from a volume | cron, daily 05:00 |
+
+`weather_ingest` needs classic compute and does not run on
 Databricks Free Edition. Its cluster settings come from a cluster
 policy that the `platform` bundle deploys; see `platform/`.
 
@@ -20,12 +30,17 @@ policy that the `platform` bundle deploys; see `platform/`.
 
 - Databricks CLI 1.23.0
 - [uv](https://docs.astral.sh/uv/)
-- Java 17 for the local Spark tests (the first run downloads the
-  Delta jars from Maven Central)
-- Per target: schema `orders_<env>` in catalog `workspace`, with the
-  volumes `landing` (raw JSON in `sales_orders/`) and `checkpoints`
+- Java 17 for the local Spark tests (the first `orders` run
+  downloads the Delta jars from Maven Central)
+- `orders`, per target: schema `orders_<env>` in catalog
+  `workspace`, with the volumes `landing` (raw JSON in
+  `sales_orders/`) and `checkpoints`
+- `weather`, per target: schema `weather_<env>` with the volume
+  `landing` (JSON in `observations/`)
 
 ## Quick start
+
+From the folder of a bundle (`orders` or `weather`):
 
 ```bash
 uv sync
@@ -37,38 +52,52 @@ databricks bundle plan -t dev -p <profile>
 ## Project structure
 
 ```
-databricks.yml          # bundle, variables, targets
-resources/              # <name>.<type>.yml, one file per resource
-mutators.py             # deploy-time standards (Python mutators)
-src/orders/             # all logic; tasks only call it
-tests/                  # pytest unit tests
-platform/               # second bundle: workspace components (policies)
+orders/                 # bundle: bronze, silver, gold
+  databricks.yml        # bundle, variables, targets
+  resources/            # <name>.<type>.yml, one file per resource
+  mutators.py           # deploy-time standards (Python mutators)
+  src/orders/           # all logic; tasks only call it
+  tests/                # pytest unit tests
+  pyproject.toml        # package, dev dependencies, pytest config
+weather/                # bundle: one classic job; same layout
+platform/               # bundle: workspace components (policies)
+ruff.toml               # lint config shared by all bundles
+.sqlfluff               # SQL lint config
+.pre-commit-config.yaml # ruff and sqlfluff hooks
 .github/workflows/      # CI (pull requests) and deploy (main)
 ```
 
 ## Targets
 
-| Target | Mode | Schema | Runs as | Deployed by |
-| --- | --- | --- | --- | --- |
-| `dev` | development | `orders_dev` | you | you |
-| `acc` | production | `orders_acc` | deploy principal | pipeline |
-| `prd` | production | `orders_prd` | run-as principal | pipeline, `main` only |
+Every bundle has the same targets.
+
+| Target | Mode | Runs as | Deployed by |
+| --- | --- | --- | --- |
+| `dev` | development | you | you |
+| `acc` | production | run-as principal | pipeline |
+| `prd` | production | run-as principal | pipeline, `main` only |
+
+The schema per target is `<bundle>_<env>`, for example
+`orders_acc`.
 
 Principals and groups are placeholders (`<deploy-sp-id>`,
 `<run-as-sp-id>`, `<data-engineers>`). The pipeline sets the real
 values.
 
-The bundle has no `workspace.host`. Locally pass `-p <profile>`; in
-CI set `DATABRICKS_HOST`. The CLI fails when a profile host differs
-from a host set in the YAML, and `workspace.host` does not accept
-variables.
+The bundles have no `workspace.host`. Locally pass `-p <profile>`;
+in CI set `DATABRICKS_HOST`. The CLI fails when a profile host
+differs from a host set in the YAML, and `workspace.host` does not
+accept variables.
 
 ## CI/CD
 
 | Workflow | Runs on | Steps |
 | --- | --- | --- |
-| `ci.yml` | pull request | prek, pytest, `validate --strict -t acc`, `plan -t acc` (artifact), for `platform/` and the root bundle |
-| `deploy.yml` | push to `main` | `deploy -t acc`, then `deploy -t prd` after approval; `platform/` goes first |
+| `ci.yml` | pull request | prek (all files); pytest per bundle; per bundle `validate --strict -t acc` and `plan -t acc` (artifact) |
+| `deploy.yml` | push to `main` | `deploy -t acc`, then `deploy -t prd` after approval; per target `orders`, then `platform`, then `weather` |
+
+`weather` looks up the policy that `platform` deploys, so `platform`
+deploys first. `orders` depends on neither.
 
 The workflows log in with workload identity federation (OIDC), so
 the repository holds no Databricks secrets. One-time setup:
@@ -83,18 +112,26 @@ the repository holds no Databricks secrets. One-time setup:
    `https://token.actions.githubusercontent.com` and the subject
    `repo:<org>/<repo>:environment:<env>`.
 
-The deploy principal deploys; the run-as principal runs the `prd`
-jobs.
+The deploy principal deploys; the run-as principal runs the `acc`
+and `prd` jobs.
 
 ## Common tasks
 
+Run from the folder of the bundle.
+
 | Task | Command |
 | --- | --- |
+| Install | `uv sync` |
 | Unit tests | `JAVA_HOME=$(brew --prefix openjdk@17) uv run pytest` |
-| Lint (ruff, sqlfluff) | `uv run prek run --all-files` |
-| Run checks on every commit | `uv run prek install` |
 | Validate | `databricks bundle validate --strict -t <target>` |
 | Preview changes | `databricks bundle plan -t <target>` |
+
+From the repository root:
+
+| Task | Command |
+| --- | --- |
+| Lint (ruff, sqlfluff) | `uvx prek@0.5.9 run --all-files` |
+| Run checks on every commit | `uvx prek@0.5.9 install` |
 
 ## Troubleshooting
 
@@ -103,16 +140,17 @@ jobs.
 - **Nothing downstream runs on a new target.** The silver and gold
   triggers watch tables that the earlier jobs create. Run bronze
   first.
-- **`deploy` fails with "Only serverless compute is supported".**
-  Free Edition rejects the classic job `orders_silver_backfill`.
-  Deploy the serverless jobs only:
-  `databricks bundle deploy -t dev --select orders_bronze,orders_silver,orders_gold`.
-  `--select` is meant for development. The deploy workflow is not
-  run on Free Edition for this reason.
+- **`deploy` of `weather` fails with "Only serverless compute is
+  supported".** Free Edition rejects classic jobs. Deploy `orders`
+  only; it has no classic compute.
 - **`validate -t acc` fails on the root path.** The path belongs to
   the deploy principal. Locally pass
   `--var deploy_sp=<your-user-name>`. The `platform` bundle needs
-  the same override for every target.
-- **`validate` fails with "Policy named 'job-compute-...'
-  does not exist".** Deploy the `platform` bundle first, or pass
-  `--var job_policy=<policy-id>`.
+  the same override for every target. With `--strict` a warning
+  about folder permissions remains; leave `--strict` out locally.
+- **`validate` of `weather` fails with "Policy named
+  'job-compute-...' does not exist".** Deploy the `platform` bundle
+  first, or pass `--var job_policy=<policy-id>`.
+- **`uv` warns that `VIRTUAL_ENV` does not match the project
+  environment.** An environment from another project is active. Run
+  `deactivate`; `uv` uses the `.venv` of the bundle folder.
