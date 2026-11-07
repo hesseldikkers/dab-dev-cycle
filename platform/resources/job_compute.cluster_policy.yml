@@ -22,8 +22,8 @@ resources:
         driver_instance_pool_id:
           type: forbidden
         spark_version:
-          type: fixed
-          value: auto:latest-lts
+          type: unlimited
+          defaultValue: auto:latest-lts
         node_type_id:
           type: allowlist
           values:
@@ -53,3 +53,9 @@ resources:
         azure_attributes.availability:
           type: fixed
           value: ON_DEMAND_AZURE
+        custom_tags.team:
+          type: fixed
+          value: data-platform
+        custom_tags.cost_center:
+          type: unlimited
+          defaultValue: unassigned
