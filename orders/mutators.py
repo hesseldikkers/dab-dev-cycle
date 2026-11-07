@@ -15,7 +15,6 @@ ALERT_EMAIL = "orders-team@example.com"
 def add_defaults(bundle: Bundle, job: Job) -> Job:
     return replace(
         job,
-        tags={"project": bundle.variables["project"], **job.tags},
         email_notifications=_with_failure_email(job.email_notifications),
         environments=[_with_version(e) for e in job.environments],
     )
