@@ -6,6 +6,11 @@ resources:
       tags:
         owner: orders-team
         layer: bronze
+        project: orders
+
+      email_notifications:
+        on_failure:
+          - orders-team@example.com
 
       schedule:
         quartz_cron_expression: "0 0 6 * * ?"
@@ -24,5 +29,6 @@ resources:
       environments:
         - environment_key: default
           spec:
+            environment_version: "6"
             dependencies:
               - ../dist/*.whl

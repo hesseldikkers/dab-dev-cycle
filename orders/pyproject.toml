@@ -31,4 +31,4 @@ pythonpath = ["."]
 addopts = "--cov --cov-report=term-missing"
 
 [tool.coverage.run]
-source = ["orders", "mutators"]
+source = ["orders"]

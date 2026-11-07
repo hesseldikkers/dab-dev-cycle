@@ -6,6 +6,11 @@ resources:
       tags:
         owner: orders-team
         layer: silver
+        project: orders
+
+      email_notifications:
+        on_failure:
+          - orders-team@example.com
 
       trigger:
         table_update:
@@ -25,5 +30,6 @@ resources:
       environments:
         - environment_key: default
           spec:
+            environment_version: "6"
             dependencies:
               - ../dist/*.whl

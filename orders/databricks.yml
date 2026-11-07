@@ -25,36 +25,17 @@ variables:
     description: Run-as service principal, set by the pipeline
     default: <run-as-sp-id>
 
-python:
-  venv_path: .venv
-  mutators:
-    - "mutators:add_defaults"
-    - "mutators:require_owner"
-
-presets:
-  tags:
-    project: orders
-
 # No workspace.host: the repo is public and all targets share one
 # workspace. Locally use -p <profile>, in CI set DATABRICKS_HOST.
 targets:
   dev:
     default: true
     mode: development
-    presets:
-      tags:
-        environment: dev
     variables:
       schema: orders_dev
 
   acc:
     mode: production
-    presets:
-      # Shared demo workspace; not needed with one workspace per target
-      name_prefix: "[acc] "
-      trigger_pause_status: UNPAUSED
-      tags:
-        environment: acc
     workspace:
       root_path: /Workspace/Users/${var.deploy_sp}/.bundle/${bundle.name}/${bundle.target}
     variables:
@@ -71,9 +52,6 @@ targets:
     mode: production
     git:
       branch: main
-    presets:
-      tags:
-        environment: prd
     workspace:
       root_path: /Workspace/Users/${var.deploy_sp}/.bundle/${bundle.name}/${bundle.target}
     variables:

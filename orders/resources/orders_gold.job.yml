@@ -6,6 +6,11 @@ resources:
       tags:
         owner: orders-team
         layer: gold
+        project: orders
+
+      email_notifications:
+        on_failure:
+          - orders-team@example.com
 
       trigger:
         table_update:
