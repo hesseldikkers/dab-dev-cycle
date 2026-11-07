@@ -1,4 +1,5 @@
 docs/*
+article/
 snippets/*
 AGENTS.md
 .databricks/
