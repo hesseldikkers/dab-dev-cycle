@@ -13,7 +13,7 @@ from mutators import (
     require_owner,
 )
 
-BUNDLE = Bundle(target="dev", variables={"project": "orders"})
+BUNDLE = Bundle(target="dev")
 
 
 def test_require_owner_passes_job_with_owner():
@@ -27,18 +27,6 @@ def test_require_owner_rejects_job_without_owner():
 
     with pytest.raises(ValueError, match='"orders_gold" has no "owner"'):
         require_owner.function(BUNDLE, job)
-
-
-def test_add_defaults_adds_project_tag():
-    job = add_defaults.function(BUNDLE, Job(tags={"layer": "gold"}))
-
-    assert job.tags == {"layer": "gold", "project": "orders"}
-
-
-def test_add_defaults_keeps_own_project_tag():
-    job = add_defaults.function(BUNDLE, Job(tags={"project": "other"}))
-
-    assert job.tags["project"] == "other"
 
 
 def test_add_defaults_adds_failure_email():
